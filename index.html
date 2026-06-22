@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#3d1f0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="大同导游">
+  <title>大同文化导游 · Datong Cultural Guide</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    /* ===== 基础重置 ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    /* ===== CSS 变量 ===== */
+    :root {
+      --bg-dark:    #1a0e07;
+      --bg-mid:     #2a1608;
+      --bg-card:    #3a2010;
+      --bg-card2:   #4a2c18;
+      --gold:       #d4a843;
+      --gold-light: #f0c060;
+      --gold-dim:   #8a6a28;
+      --red:        #c0392b;
+      --red-dark:   #8b1a10;
+      --text-main:  #f5e6c8;
+      --text-sub:   #c8a878;
+      --text-dim:   #806040;
+      --border:     rgba(212,168,67,0.3);
+      --shadow:     rgba(0,0,0,0.6);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', serif;
+      overflow-x: hidden;
+    }
+
+    /* ===== 滚动条 ===== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* ===== 通用动画 ===== */
+    @keyframes fadeIn  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideIn { from { opacity:0; transform:translateX(40px);} to { opacity:1; transform:translateX(0); } }
+    @keyframes pulse   { 0%,100%{opacity:1;} 50%{opacity:.5;} }
+    @keyframes spin    { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+
+    /* ===== 装饰纹路 ===== */
+    .pattern-border {
+      border: 1px solid var(--border);
+      border-image: repeating-linear-gradient(90deg, var(--gold-dim) 0, var(--gold-dim) 6px, transparent 6px, transparent 12px) 1;
+    }
+
+    /* ========================================
+       首页 — 景点列表
+    ======================================== */
+    #page-home {
+      min-height: 100vh;
+      animation: fadeIn .5s ease;
+    }
+
+    /* 顶栏 */
+    .home-header {
+      position: relative;
+      background: linear-gradient(160deg, #3d1f0a 0%, #1a0e07 100%);
+      padding: 3rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .home-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a843' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: .6;
+    }
+    .home-header-inner { position: relative; z-index: 1; }
+
+    .lang-toggle {
+      position: absolute; top: 1rem; right: 1rem; z-index: 2;
+      display: flex; gap: .3rem;
+    }
+    .lang-btn {
+      padding: .3rem .65rem;
+      border-radius: 2rem;
+      border: 1px solid var(--gold-dim);
+      background: transparent;
+      color: var(--text-sub);
+      font-size: .72rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1a0e07;
+      font-weight: 700;
+    }
+
+    .home-title-badge {
+      display: inline-block;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: .6rem;
+    }
+    .home-title-zh {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-shadow: 0 0 30px rgba(212,168,67,.4);
+      line-height: 1.2;
+    }
+    .home-title-en {
+      font-size: .82rem;
+      color: var(--text-sub);
+      letter-spacing: .08em;
+      margin-top: .4rem;
+    }
+    .home-divider {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1rem auto;
+    }
+    .home-subtitle {
+      font-size: .8rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* 景点卡片列表 */
+    .spots-grid {
+      padding: 1.2rem 1rem 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .spot-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .spot-card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--gold), var(--red-dark));
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .spot-card:active, .spot-card:hover {
+      background: var(--bg-card2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+    .spot-card:active::before, .spot-card:hover::before { opacity: 1; }
+
+    .spot-cover {
+      width: 52px; height: 52px;
+      background: var(--bg-mid);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .spot-info { flex: 1; min-width: 0; }
+    .spot-num {
+      font-size: .6rem;
+      color: var(--gold-dim);
+      letter-spacing: .1em;
+      margin-bottom: .2rem;
+    }
+    .spot-name-zh {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .spot-name-en {
+      font-size: .72rem;
+      color: var(--text-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: .1rem;
+    }
+    .spot-brief {
+      font-size: .68rem;
+      color: var(--text-dim);
+      margin-top: .3rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .spot-steps-badge {
+      flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+      gap: .15rem;
+    }
+    .spot-steps-badge .num {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .spot-steps-badge .label {
+      font-size: .55rem;
+      color: var(--text-dim);
+    }
+    .spot-arrow {
+      color: var(--gold-dim);
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+
+    /* 底部固定栏 */
+    .bottom-tip {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(0deg, var(--bg-dark) 70%, transparent);
+      padding: 1rem 1rem .8rem;
+      text-align: center;
+      font-size: .68rem;
+      color: var(--text-dim);
+    }
+
+    /* ========================================
+       详情页 — 景点导览
+    ======================================== */
+    #page-detail {
+      min-height: 100vh;
+      display: none;
+    }
+    #page-detail.active {
+      display: block;
+      animation: slideIn .35s ease;
+    }
+
+    /* 详情顶栏 */
+    .detail-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(26,14,7,.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: .9rem 1rem;
+      display: flex; align-items: center; gap: .8rem;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--gold);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .back-btn:active { background: var(--bg-card2); }
+
+    .detail-header-title { flex: 1; min-width: 0; }
+    .detail-header-cover { font-size: 1.2rem; line-height: 1; margin-bottom: .15rem; }
+    .detail-header-name-zh {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .detail-header-name-en {
+      font-size: .65rem;
+      color: var(--text-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .header-lang-toggle {
+      display: flex; gap: .25rem; flex-shrink: 0;
+    }
+    .header-lang-btn {
+      padding: .25rem .55rem;
+      border-radius: 2rem;
+      border: 1px solid var(--gold-dim);
+      background: transparent;
+      color: var(--text-sub);
+      font-size: .65rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .header-lang-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1a0e07;
+      font-weight: 700;
+    }
+
+    /* 景点简介区 */
+    .detail-brief-bar {
+      background: var(--bg-mid);
+      border-bottom: 1px solid var(--border);
+      padding: .7rem 1rem;
+      display: flex; align-items: flex-start; gap: .7rem;
+    }
+    .brief-cover {
+      font-size: 2rem; line-height: 1; flex-shrink: 0;
+    }
+    .brief-text {
+      flex: 1;
+    }
+    .brief-text .brief-label {
+      font-size: .6rem;
+      color: var(--gold-dim);
+      letter-spacing: .1em;
+      margin-bottom: .25rem;
+    }
+    .brief-text .brief-content {
+      font-size: .8rem;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }
+
+    /* 进度指示器 */
+    .progress-bar-wrap {
+      padding: .8rem 1rem .4rem;
+      background: var(--bg-dark);
+    }
+    .progress-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: .5rem;
+    }
+    .progress-label {
+      font-size: .68rem;
+      color: var(--text-dim);
+    }
+    .progress-frac {
+      font-size: .68rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .progress-track {
+      height: 3px;
+      background: var(--bg-card);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red-dark), var(--gold));
+      border-radius: 2px;
+      transition: width .4s ease;
+    }
+
+    /* 步骤导航 dots */
+    .steps-nav {
+      padding: .6rem 1rem .4rem;
+      display: flex; gap: .4rem; align-items: center;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .steps-nav::-webkit-scrollbar { display: none; }
+    .step-dot {
+      width: 28px; height: 28px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .step-dot.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1a0e07;
+      font-weight: 700;
+      transform: scale(1.15);
+    }
+    .step-dot.visited {
+      background: var(--red-dark);
+      border-color: var(--red-dark);
+      color: var(--text-sub);
+    }
+
+    /* 当前步骤卡片 */
+    .step-card {
+      margin: .8rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .step-card-header {
+      padding: .9rem 1rem .6rem;
+      background: linear-gradient(135deg, var(--bg-card2), var(--bg-card));
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: .7rem;
+    }
+    .step-num-badge {
+      width: 30px; height: 30px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--red-dark), var(--gold-dim));
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .step-title-block { flex: 1; }
+    .step-title {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      line-height: 1.35;
+    }
+    .step-title-en {
+      font-size: .7rem;
+      color: var(--text-sub);
+      margin-top: .2rem;
+    }
+
+    .step-content {
+      padding: 1rem;
+      font-size: .85rem;
+      color: var(--text-main);
+      line-height: 1.85;
+      min-height: 140px;
+    }
+    .photo-tip {
+      margin: 0 1rem .5rem;
+      padding: .5rem .75rem;
+      background: rgba(180,140,100,.08);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      font-size: .78rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    /* 语音播放区 */
+    .voice-zone {
+      padding: .7rem 1rem 1rem;
+      display: flex; flex-direction: column; gap: .6rem;
+    }
+    .voice-row {
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .voice-play-btn {
+      flex: 1;
+      height: 44px;
+      background: linear-gradient(135deg, var(--red-dark), #a0201a);
+      border: none;
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: .85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .voice-play-btn:active { opacity: .8; transform: scale(.97); }
+    .voice-play-btn.playing {
+      background: linear-gradient(135deg, #8a1a10, #6a0e08);
+    }
+    .voice-play-btn.playing .btn-icon::after { content: '⏸'; }
+    .voice-play-btn:not(.playing) .btn-icon::after { content: '▶'; }
+    .btn-icon { font-size: .9rem; }
+
+    .voice-speed-group {
+      display: flex; gap: .3rem;
+    }
+    .speed-btn {
+      padding: .3rem .5rem;
+      background: var(--bg-mid);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      font-size: .68rem;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .speed-btn.active {
+      background: var(--gold-dim);
+      border-color: var(--gold);
+      color: var(--text-main);
+    }
+
+    /* 播放进度波形 */
+    .voice-wave {
+      height: 24px;
+      display: flex; align-items: center; gap: 2px;
+      padding: 0 .2rem;
+    }
+    .wave-bar {
+      width: 3px;
+      background: var(--gold-dim);
+      border-radius: 2px;
+      min-height: 4px;
+      transition: height .1s;
+    }
+    .voice-wave.playing .wave-bar {
+      animation: waveAnim var(--dur, .6s) ease-in-out infinite alternate;
+    }
+    @keyframes waveAnim {
+      from { transform: scaleY(.3); }
+      to   { transform: scaleY(1); }
+    }
+
+    /* 步骤切换按钮 */
+    .step-nav-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .7rem;
+      padding: 0 1rem 1.5rem;
+    }
+    .nav-btn {
+      height: 46px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: .82rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .nav-btn:active { opacity: .7; }
+    .nav-btn.primary {
+      background: linear-gradient(135deg, var(--bg-card2), var(--red-dark));
+      border-color: var(--red-dark);
+    }
+    .nav-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+    }
+
+    /* 完成提示 */
+    .finish-card {
+      margin: .8rem 1rem 2rem;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-card2));
+      border: 1px solid var(--gold-dim);
+      border-radius: 14px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+    }
+    .finish-icon { font-size: 2rem; margin-bottom: .6rem; }
+    .finish-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: .4rem;
+    }
+    .finish-subtitle {
+      font-size: .78rem;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }
+    .finish-back-btn {
+      margin-top: 1rem;
+      padding: .65rem 2rem;
+      background: linear-gradient(135deg, var(--red-dark), var(--gold-dim));
+      border: none;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: .85rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity .2s;
+    }
+    .finish-back-btn:active { opacity: .75; }
+
+    /* TTS 不支持提示 */
+    .tts-unsupported {
+      padding: .6rem 1rem;
+      background: var(--bg-mid);
+      border: 1px dashed var(--text-dim);
+      border-radius: 8px;
+      margin: 0 1rem;
+      font-size: .72rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    /* 响应式 */
+    @media (min-width: 480px) {
+      .home-title-zh { font-size: 2.6rem; }
+      .spots-grid { padding: 1.5rem 1.5rem 5rem; }
+      .step-content { font-size: .9rem; }
+    }
+    @media (min-width: 768px) {
+      .spots-grid { max-width: 640px; margin: 0 auto; }
+      #page-detail { max-width: 640px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== 首页 ===== -->
+<div id="page-home">
+  <div class="home-header">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('zh')" id="home-lang-zh">中文</button>
+      <button class="lang-btn" onclick="setLang('en')" id="home-lang-en">EN</button>
+    </div>
+    <div class="home-header-inner">
+      <div class="home-title-badge" id="home-badge">✦ 文化导游手册 ✦</div>
+      <div class="home-title-zh" id="home-title-zh">大同古都</div>
+      <div class="home-title-en" id="home-title-en">Datong · Ancient Capital of Northern Wei</div>
+      <div class="home-divider"></div>
+      <div class="home-subtitle" id="home-subtitle">北魏国都 · 辽金重镇 · 世界文化遗产<br>1,500 years of history await you</div>
+    </div>
+  </div>
+  <div class="spots-grid" id="spots-grid"></div>
+  <div class="bottom-tip" id="bottom-tip">点击景点进入详细解说 · 支持中英双语语音导览</div>
+</div>
+
+<!-- ===== 详情页 ===== -->
+<div id="page-detail">
+  <div class="detail-header">
+    <div class="back-btn" onclick="goHome()">←</div>
+    <div class="detail-header-title">
+      <div class="detail-header-cover" id="detail-cover"></div>
+      <div class="detail-header-name-zh" id="detail-name-zh"></div>
+      <div class="detail-header-name-en" id="detail-name-en"></div>
+    </div>
+    <div class="header-lang-toggle">
+      <button class="header-lang-btn active" onclick="setLang('zh')" id="detail-lang-zh">中</button>
+      <button class="header-lang-btn" onclick="setLang('en')" id="detail-lang-en">EN</button>
+    </div>
+  </div>
+
+  <div class="detail-brief-bar">
+    <div class="brief-cover" id="brief-cover"></div>
+    <div class="brief-text">
+      <div class="brief-label" id="brief-label">景点简介</div>
+      <div class="brief-content" id="brief-content"></div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-header">
+      <span class="progress-label" id="progress-label">参观进度</span>
+      <span class="progress-frac" id="progress-frac"></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="steps-nav" id="steps-nav"></div>
+
+  <div id="step-area"><!-- 步骤内容动态渲染 --></div>
+</div>
+
+<script src="data/spots.js"></script>
+<script>
+// ===========================
+// 状态
+// ===========================
+let lang = 'zh';
+let currentSpot = null;
+let currentStep = 0;
+let visitedSteps = new Set();
+let ttsSupported = 'speechSynthesis' in window;
+let isPlaying = false;
+let speechRate = 1.0;
+let speechQueue = [];
+let currentQueueIndex = 0;
+let keepAliveId = null;
+
+// 语音配置：中文用 zh-CN（更自然），英文 en-US
+const TTS_CONFIG = {
+  zh: { lang: 'zh-CN', pitch: 1.0, rate: 0.85 },
+  en: { lang: 'en-US', pitch: 1.0, rate: 0.9  }
+};
+
+// 获取最佳语音
+function getBestVoice(langCode) {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+
+  // 打印可用语音（调试用）
+  const availZh = voices.filter(v => v.lang.startsWith('zh'));
+  const availEn = voices.filter(v => v.lang.startsWith('en'));
+  console.log('Available Chinese voices:', availZh.map(v => v.name + ' (' + v.lang + ')').join(', '));
+  console.log('Available English voices:', availEn.map(v => v.name + ' (' + v.lang + ')').join(', '));
+
+  // 语音优先级（macOS 高质量语音在前）
+  const preferred = {
+    'zh-CN': ['Ting-Ting', 'Tingting', 'Sin-Ji', 'Sinji', 'Mei-Jia', 'Meijia', 'Li-Mu', 'Limu', 'Yu-Shu', 'Yushu'],
+    'en-US': ['Samantha', 'Alex', 'Karen', 'Daniel', 'Fred', 'Victoria'],
+    'en-GB': ['Daniel', 'Fiona', 'Oliver', 'Kate']
+  };
+
+  // 精确匹配 lang
+  let candidates = voices.filter(v => v.lang === langCode);
+  // 前缀匹配
+  if (!candidates.length) {
+    candidates = voices.filter(v => v.lang.startsWith(langCode.split('-')[0]));
+  }
+  if (!candidates.length) {
+    candidates = voices;
+  }
+
+  // 按优先级排序
+  const prefs = preferred[langCode] || [];
+  candidates.sort((a, b) => {
+    const ai = prefs.findIndex(p => a.name.toLowerCase().includes(p.toLowerCase()));
+    const bi = prefs.findIndex(p => b.name.toLowerCase().includes(p.toLowerCase()));
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+
+  const best = candidates[0] || null;
+  console.log('Selected voice:', best ? best.name + ' (' + best.lang + ')' : 'default');
+  return best;
+}
+
+// 预加载语音列表
+function ensureVoicesLoaded() {
+  return new Promise((resolve) => {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      resolve(voices);
+    } else {
+      window.speechSynthesis.addEventListener('voiceschanged', () => {
+        resolve(window.speechSynthesis.getVoices());
+      }, { once: true });
+    }
+  });
+}
+
+// 估算朗读时长（ms），用于超时兜底
+function estimateSpeechTime(text, rate) {
+  // 中文约每分钟 220 字，英文约每分钟 150 词
+  const isZh = /[\u4e00-\u9fff]/.test(text);
+  const chars = isZh ? text.replace(/[^\\u4e00-\\u9fff]/g, '').length : text.split(/\\s+/).length;
+  const wpm = isZh ? 220 : 150;
+  const mins = chars / wpm;
+  return Math.max(2000, mins * 60 * 1000 / rate) + 1500; // 至少2秒，加1.5秒余量
+}
+
+// ===========================
+// 语言切换
+// ===========================
+function setLang(l) {
+  lang = l;
+  // 首页按钮
+  document.getElementById('home-lang-zh').classList.toggle('active', l === 'zh');
+  document.getElementById('home-lang-en').classList.toggle('active', l === 'en');
+  // 详情页按钮
+  document.getElementById('detail-lang-zh').classList.toggle('active', l === 'zh');
+  document.getElementById('detail-lang-en').classList.toggle('active', l === 'en');
+
+  if (currentSpot !== null) {
+    updateDetailTexts();
+    renderStepArea();
+  } else {
+    renderSpotsList();
+    updateHomeTexts();
+  }
+  stopSpeech();
+}
+
+function updateHomeTexts() {
+  if (lang === 'zh') {
+    document.getElementById('home-badge').textContent = '✦ 文化导游手册 ✦';
+    document.getElementById('home-subtitle').innerHTML = '北魏国都 · 辽金重镇 · 世界文化遗产<br>1,500 years of history await you';
+    document.getElementById('bottom-tip').textContent = '点击景点进入详细解说 · 支持中英双语语音导览';
+  } else {
+    document.getElementById('home-badge').textContent = '✦ Cultural Guide ✦';
+    document.getElementById('home-subtitle').innerHTML = 'Capital of Northern Wei · Liao-Jin Heritage<br>UNESCO World Heritage Site';
+    document.getElementById('bottom-tip').textContent = 'Tap a spot to begin · Bilingual audio guide available';
+  }
+}
+
+// ===========================
+// 首页渲染
+// ===========================
+function renderSpotsList() {
+  const grid = document.getElementById('spots-grid');
+  grid.innerHTML = SPOTS_DATA.map((spot, i) => `
+    <div class="spot-card" onclick="openSpot(${i})">
+      <div class="spot-cover">${spot.cover}</div>
+      <div class="spot-info">
+        <div class="spot-num">${lang==='zh' ? `第 ${i+1} 站` : `Stop ${i+1}`}</div>
+        <div class="spot-name-zh">${lang==='zh' ? spot.name : spot.nameEn}</div>
+        <div class="spot-name-en">${lang==='zh' ? spot.nameEn : spot.name}</div>
+        <div class="spot-brief">${lang==='zh' ? spot.brief : spot.briefEn}</div>
+      </div>
+      <div class="spot-steps-badge">
+        <span class="num">${spot.steps.length}</span>
+        <span class="label">${lang==='zh' ? '景点' : 'stops'}</span>
+      </div>
+      <div class="spot-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+// ===========================
+// 打开景点
+// ===========================
+function openSpot(idx) {
+  stopSpeech();
+  currentSpot = idx;
+  currentStep = 0;
+  visitedSteps = new Set([0]);
+
+  document.getElementById('page-home').style.display = 'none';
+  const detailEl = document.getElementById('page-detail');
+  detailEl.style.display = 'block';
+  detailEl.classList.add('active');
+
+  updateDetailTexts();
+  renderStepsNav();
+  renderStepArea();
+  updateProgress();
+}
+
+function updateDetailTexts() {
+  const spot = SPOTS_DATA[currentSpot];
+  document.getElementById('detail-cover').textContent = spot.cover;
+  document.getElementById('detail-name-zh').textContent = lang==='zh' ? spot.name : spot.nameEn;
+  document.getElementById('detail-name-en').textContent = lang==='zh' ? spot.nameEn : spot.name;
+  document.getElementById('brief-cover').textContent = spot.cover;
+  document.getElementById('brief-label').textContent = lang==='zh' ? '景点简介' : 'About This Spot';
+  document.getElementById('brief-content').textContent = lang==='zh' ? spot.brief : spot.briefEn;
+  document.getElementById('progress-label').textContent = lang==='zh' ? '参观进度' : 'Progress';
+}
+
+// ===========================
+// 进度条
+// ===========================
+function updateProgress() {
+  const spot = SPOTS_DATA[currentSpot];
+  const total = spot.steps.length;
+  const cur = currentStep + 1;
+  document.getElementById('progress-frac').textContent = `${cur} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${(cur/total)*100}%`;
+}
+
+// ===========================
+// 步骤 dots 导航
+// ===========================
+function renderStepsNav() {
+  const spot = SPOTS_DATA[currentSpot];
+  const nav = document.getElementById('steps-nav');
+  nav.innerHTML = spot.steps.map((_, i) => `
+    <div class="step-dot ${i===currentStep?'active':visitedSteps.has(i)?'visited':''}"
+         onclick="jumpToStep(${i})">${i+1}</div>
+  `).join('');
+}
+
+function jumpToStep(i) {
+  stopSpeech();
+  currentStep = i;
+  visitedSteps.add(i);
+  renderStepsNav();
+  renderStepArea();
+  updateProgress();
+  // 滚动到顶部
+  document.getElementById('page-detail').scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ===========================
+// 步骤内容渲染
+// ===========================
+function renderStepArea() {
+  const spot = SPOTS_DATA[currentSpot];
+  const step = spot.steps[currentStep];
+  const isLast = currentStep === spot.steps.length - 1;
+  const isFirst = currentStep === 0;
+
+  const titleText = lang==='zh' ? step.title : step.titleEn;
+  const titleSub  = lang==='zh' ? step.titleEn : step.title;
+  const content   = lang==='zh' ? step.content : step.contentEn;
+  const photoTip  = lang==='zh' ? (step.photoSpot || '') : (step.photoSpotEn || '');
+  const stepLabel = lang==='zh' ? `第 ${currentStep+1} 景` : `Stop ${currentStep+1}`;
+  const totalLabel= lang==='zh' ? `共 ${spot.steps.length} 处` : `of ${spot.steps.length}`;
+
+  const waveHTML = Array.from({length:12}, (_,i) =>
+    `<div class="wave-bar" style="height:${6+Math.sin(i*0.8)*6}px;--dur:${0.4+i*0.07}s"></div>`
+  ).join('');
+
+  const voiceSection = ttsSupported ? `
+    <div class="voice-zone">
+      <div class="voice-row">
+        <button class="voice-play-btn" id="play-btn" onclick="togglePlay()">
+          <span class="btn-icon"></span>
+          <span id="play-label">${lang==='zh' ? '语音朗读' : 'Listen'}</span>
+        </button>
+        <div class="voice-speed-group">
+          <button class="speed-btn ${speechRate===0.75?'active':''}" onclick="setRate(0.75)">慢</button>
+          <button class="speed-btn ${speechRate===1.0?'active':''}" onclick="setRate(1.0)">标</button>
+          <button class="speed-btn ${speechRate===1.3?'active':''}" onclick="setRate(1.3)">快</button>
+        </div>
+      </div>
+      <div class="voice-wave" id="voice-wave">${waveHTML}</div>
+    </div>` : `<div class="tts-unsupported">${lang==='zh'?'当前浏览器不支持语音，建议使用 Chrome / Safari':'Speech not supported. Try Chrome or Safari'}</div>`;
+
+  let navButtons = '';
+  if (!isLast) {
+    navButtons = `
+      <div class="step-nav-btns">
+        <button class="nav-btn" onclick="prevStep()" ${isFirst?'disabled':''}>← ${lang==='zh'?'上一景':'Prev'}</button>
+        <button class="nav-btn primary" onclick="nextStep()">${lang==='zh'?'下一景':'Next'} →</button>
+      </div>`;
+  } else {
+    navButtons = `
+      <div class="step-nav-btns">
+        <button class="nav-btn" onclick="prevStep()">← ${lang==='zh'?'上一景':'Prev'}</button>
+      </div>
+      <div class="finish-card">
+        <div class="finish-icon">🎉</div>
+        <div class="finish-title">${lang==='zh'?`${spot.name} 参观完毕！`:`${spot.nameEn} Complete!`}</div>
+        <div class="finish-subtitle">${lang==='zh'
+          ?`您已完整游览本景点的所有 ${spot.steps.length} 处重点景观，<br>感谢您的细心参观！`
+          :`You've explored all ${spot.steps.length} highlights of this site.<br>Thank you for visiting!`}</div>
+        <button class="finish-back-btn" onclick="goHome()">
+          ${lang==='zh'?'← 返回景点列表':'← Back to Spots'}
+        </button>
+      </div>`;
+  }
+
+  document.getElementById('step-area').innerHTML = `
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-badge">${currentStep+1}</div>
+        <div class="step-title-block">
+          <div class="step-title">${titleText}</div>
+          <div class="step-title-en">${titleSub}</div>
+        </div>
+      </div>
+      <div class="step-content">${content}</div>
+      ${photoTip ? `<div class="photo-tip">📸 ${photoTip}</div>` : ''}
+      ${voiceSection}
+    </div>
+    ${navButtons}
+  `;
+}
+
+// ===========================
+// 上/下步骤
+// ===========================
+function nextStep() {
+  stopSpeech();
+  const spot = SPOTS_DATA[currentSpot];
+  if (currentStep < spot.steps.length - 1) {
+    currentStep++;
+    visitedSteps.add(currentStep);
+    renderStepsNav();
+    renderStepArea();
+    updateProgress();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+function prevStep() {
+  stopSpeech();
+  if (currentStep > 0) {
+    currentStep--;
+    renderStepsNav();
+    renderStepArea();
+    updateProgress();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+// ===========================
+// 返回首页
+// ===========================
+function goHome() {
+  stopSpeech();
+  currentSpot = null;
+  document.getElementById('page-detail').style.display = 'none';
+  document.getElementById('page-detail').classList.remove('active');
+  document.getElementById('page-home').style.display = 'block';
+  window.scrollTo({top:0});
+}
+
+// ===========================
+// TTS 语音 — 分段队列朗读
+// ===========================
+
+// 将文本拆分为句子（中英文分别处理）
+function splitSentences(text, langCode) {
+  if (langCode === 'zh') {
+    // 中文：按 。！？；， 拆分，过滤空串
+    return text.split(/(?<=[。！？；，])/).filter(s => s.trim().length > 0);
+  } else {
+    // 英文：按 . ! ? ; , 拆分
+    return text.split(/(?<=[.!?;,])/).filter(s => s.trim().length > 0);
+  }
+}
+
+function getReadText() {
+  const spot = SPOTS_DATA[currentSpot];
+  const step = spot.steps[currentStep];
+  if (lang === 'zh') return `${step.title}。${step.content}`;
+  return `${step.titleEn}. ${step.contentEn}`;
+}
+
+function togglePlay() {
+  if (isPlaying) {
+    stopSpeech();
+  } else {
+    startSpeech();
+  }
+}
+
+// 队列朗读：一句一句读，句间自然停顿
+async function speakQueue(voice, cfg) {
+  const totalSentences = speechQueue.length;
+
+  for (let i = 0; i < totalSentences; i++) {
+    if (!isPlaying) break; // 用户停止了
+
+    currentQueueIndex = i;
+    const sentence = speechQueue[i];
+    if (!sentence.trim()) continue;
+
+    const utter = new SpeechSynthesisUtterance(sentence);
+    if (voice) {
+      utter.voice = voice;
+      utter.lang = voice.lang;
+    } else {
+      utter.lang = cfg.lang;
+    }
+    utter.rate = speechRate * cfg.rate;
+    utter.pitch = cfg.pitch;
+
+    // 等待当前句读完（带超时兜底，防止 onend 不触发）
+    await new Promise((resolve) => {
+      let resolved = false;
+      const done = () => {
+        if (resolved) return;
+        resolved = true;
+        // 句间停顿：中文 400ms，英文 250ms
+        const pause = cfg.lang.startsWith('zh') ? 400 : 250;
+        setTimeout(resolve, pause);
+      };
+
+      utter.onend = done;
+      utter.onerror = (e) => {
+        console.log('TTS error on sentence', i, e.error || e.type || e);
+        done(); // 出错也继续下一句
+      };
+      utter.onboundary = null; // 不要跟 boundary 混淆
+
+      // 超时兜底：按句子长度估算，最多等 12 秒
+      const timeoutMs = Math.min(12000, estimateSpeechTime(sentence, speechRate * cfg.rate) + 3000);
+      const timer = setTimeout(() => {
+        console.log('TTS timeout on sentence', i, '(', sentence.slice(0, 15), '...)');
+        done();
+      }, timeoutMs);
+
+      // 真正开始朗读
+      window.speechSynthesis.speak(utter);
+
+      // 双重保险：每句开始后再设一个 500ms 后检查 speaking 状态的兜底
+      setTimeout(() => {
+        if (!window.speechSynthesis.speaking && !resolved) {
+          console.log('TTS not speaking after 500ms, sentence', i);
+          clearTimeout(timer);
+          done();
+        }
+      }, 500);
+    });
+  }
+
+  // 全部读完
+  if (isPlaying) finishSpeech();
+}
+
+function finishSpeech() {
+  isPlaying = false;
+  currentQueueIndex = 0;
+  speechQueue = [];
+  if (keepAliveId) { clearInterval(keepAliveId); keepAliveId = null; }
+  const btn = document.getElementById('play-btn');
+  const wave = document.getElementById('voice-wave');
+  if (btn) btn.classList.remove('playing');
+  if (btn) {
+    const lbl = document.getElementById('play-label');
+    if (lbl) lbl.textContent = lang==='zh'?'语音朗读':'Listen';
+  }
+  if (wave) wave.classList.remove('playing');
+}
+
+async function startSpeech() {
+  if (!ttsSupported) return;
+  stopSpeech();
+
+  await ensureVoicesLoaded();
+
+  const cfg = lang === 'zh' ? TTS_CONFIG.zh : TTS_CONFIG.en;
+  const text = getReadText();
+  const bestVoice = getBestVoice(cfg.lang);
+
+  // 拆分句子
+  speechQueue = splitSentences(text, cfg.lang);
+  currentQueueIndex = 0;
+
+  console.log(`TTS: ${speechQueue.length} sentences, voice=${bestVoice ? bestVoice.name : 'default'}, rate=${(speechRate * cfg.rate).toFixed(2)}`);
+
+  // 标记播放状态
+  isPlaying = true;
+  const btn = document.getElementById('play-btn');
+  const wave = document.getElementById('voice-wave');
+  if (btn) btn.classList.add('playing');
+  if (btn) {
+    const lbl = document.getElementById('play-label');
+    if (lbl) lbl.textContent = lang==='zh'?'暂停朗读':'Pause';
+  }
+  if (wave) wave.classList.add('playing');
+
+  // keepAlive：简单 ping，防止部分浏览器自动停止（Android 上 pause/resume 反而有害，只做轻量检测）
+  keepAliveId = setInterval(() => {
+    if (!isPlaying) {
+      clearInterval(keepAliveId);
+      keepAliveId = null;
+    }
+    // Android Chrome：不调用 pause/resume，只检查状态
+    // 如果浏览器支持且没在朗读，重新触发当前句
+    if (window.speechSynthesis && !window.speechSynthesis.speaking && isPlaying) {
+      console.log('TTS: speech stopped unexpectedly, recovery attempted');
+    }
+  }, 10000);
+
+  // 开始队列朗读
+  speakQueue(bestVoice, cfg);
+}
+
+function stopSpeech() {
+  if (ttsSupported) window.speechSynthesis.cancel();
+  isPlaying = false;
+  currentQueueIndex = 0;
+  speechQueue = [];
+  if (keepAliveId) { clearInterval(keepAliveId); keepAliveId = null; }
+  const btn = document.getElementById('play-btn');
+  const wave = document.getElementById('voice-wave');
+  if (btn) btn.classList.remove('playing');
+  if (btn) {
+    const lbl = document.getElementById('play-label');
+    if (lbl) lbl.textContent = lang==='zh'?'语音朗读':'Listen';
+  }
+  if (wave) wave.classList.remove('playing');
+}
+
+function setRate(r) {
+  speechRate = r;
+  // 重新渲染速度按钮
+  document.querySelectorAll('.speed-btn').forEach((btn, i) => {
+    const rates = [0.75, 1.0, 1.3];
+    btn.classList.toggle('active', rates[i] === speechRate);
+  });
+}
+
+// ===========================
+// 页面可见性（后台暂停）
+// ===========================
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isPlaying) {
+    // 切后台：暂停朗读（Android 后台会自动暂停，这里显式处理）
+    window.speechSynthesis.pause();
+  } else if (!document.hidden && isPlaying) {
+    // 切回前台：取消再重新朗读当前句（比 resume() 更可靠）
+    window.speechSynthesis.cancel();
+    // 重新从当前句开始
+    if (speechQueue.length > 0 && currentQueueIndex < speechQueue.length) {
+      const utter = new SpeechSynthesisUtterance(speechQueue[currentQueueIndex]);
+      const cfg = lang === 'zh' ? TTS_CONFIG.zh : TTS_CONFIG.en;
+      const voice = getBestVoice(cfg.lang);
+      if (voice) { utter.voice = voice; utter.lang = voice.lang; }
+      else { utter.lang = cfg.lang; }
+      utter.rate = speechRate * cfg.rate;
+      utter.pitch = cfg.pitch;
+      utter.onend = () => {
+        // 继续下一句
+        currentQueueIndex++;
+        if (currentQueueIndex < speechQueue.length && isPlaying) {
+          speakQueueFromIndex(voice, cfg, currentQueueIndex);
+        } else {
+          finishSpeech();
+        }
+      };
+      window.speechSynthesis.speak(utter);
+    }
+  }
+});
+
+// 从指定索引继续朗读（visibility change 恢复用）
+function speakQueueFromIndex(voice, cfg, startIndex) {
+  if (startIndex >= speechQueue.length || !isPlaying) { finishSpeech(); return; }
+  const utter = new SpeechSynthesisUtterance(speechQueue[startIndex]);
+  if (voice) { utter.voice = voice; utter.lang = voice.lang; }
+  else { utter.lang = cfg.lang; }
+  utter.rate = speechRate * cfg.rate;
+  utter.pitch = cfg.pitch;
+  utter.onend = () => {
+    const next = startIndex + 1;
+    if (next < speechQueue.length && isPlaying) {
+      speakQueueFromIndex(voice, cfg, next);
+    } else {
+      finishSpeech();
+    }
+  };
+  utter.onerror = () => {
+    const next = startIndex + 1;
+    if (next < speechQueue.length && isPlaying) {
+      speakQueueFromIndex(voice, cfg, next);
+    } else {
+      finishSpeech();
+    }
+  };
+  window.speechSynthesis.speak(utter);
+}
+
+// ===========================
+// Service Worker 注册 & 更新管理
+// ===========================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // 监听新 SW 安装完成（等待激活）
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // 新版本已安装，通知 SW 立即激活
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        }
+      });
+
+      // 监听控制器变化（新 SW 激活后刷新页面以获取最新资源）
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    }).catch(() => {});
+  });
+}
+
+// ===========================
+// 初始化
+// ===========================
+renderSpotsList();
+</script>
+</body>
+</html>

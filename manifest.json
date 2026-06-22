@@ -1,0 +1,27 @@
+{
+  "name": "大同文化导游",
+  "short_name": "大同导游",
+  "description": "大同十大景点中英双语导游解说词，含语音朗读，离线可用",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0e07",
+  "theme_color": "#3d1f0a",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "education"],
+  "screenshots": []
+}

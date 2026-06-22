@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.pem
+*.pyc
+__pycache__/
+https_server.py
+gen_spots.py
