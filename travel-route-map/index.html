@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" data-page-node-id="UYjCAq3eVeXEQ1Oac9680i" data-dm-ref="1"><head data-page-node-id="LIzC7ZXBcQ23KqAuUpcH6E">
+<meta charset="UTF-8" data-page-node-id="aPFU4WyrkChIYjoI6L5Pl7">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" data-page-node-id="vIridEaAik2wfCod53dMJ4">
+<title>China Culinary Training · 11-Day Itinerary Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" data-page-node-id="TyCGt7NQlFLVc2piov0BVr">
+<style>
+  :root{
+    --shanghai:#2563eb; --chengdu:#ea580c; --suzhou:#16a34a;
+    --bg:#f7f8fa; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#0d9488;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--text);background:var(--bg);}
+  header{padding:14px 16px 10px;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;}
+  header h1{margin:0;font-size:18px;font-weight:700;}
+  header p{margin:4px 0 0;font-size:12px;opacity:.9;}
+
+  /* Day badge in header */
+  .day-badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:6px;padding:2px 8px;
+    font-size:11px;font-weight:600;margin-left:6px;vertical-align:middle;}
+
+  main{display:flex;height:calc(100% - 90px);}
+  .timeline{width:40%;max-width:460px;overflow-y:auto;padding:12px 14px 40px;background:var(--bg);}
+  .map{flex:1;height:100%;min-width:0;}
+
+  /* Day group header */
+  .day-group{margin:16px 0 8px;}
+  .day-group:first-child{margin-top:2px;}
+  .day-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(135deg,#0d9488,#0f766e);
+    color:#fff;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;
+    transition:transform .15s;user-select:none;}
+  .day-hd:hover{transform:translateX(3px);}
+  .day-hd .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .day-hd .city-tag{font-size:11px;font-weight:500;opacity:.85;margin-left:auto;}
+  .day-hd .stop-count{font-size:11px;opacity:.75;}
+
+  /* Stop card */
+  .stop{position:relative;display:flex;gap:10px;padding:10px 12px;margin-bottom:8px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s;}
+  .stop:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-1px);}
+  .stop.active{box-shadow:0 4px 14px rgba(0,0,0,.15);border-color:var(--accent);}
+  .badge{flex:0 0 24px;height:24px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;}
+  .stop .body{min-width:0;flex:1;}
+  .stop .time{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+  .stop .name{font-size:14px;font-weight:600;margin:1px 0 2px;line-height:1.3;}
+  .stop .act{font-size:12px;color:var(--muted);line-height:1.4;}
+  .stop .city-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+
+  /* Map pins */
+  .pin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;}
+  .pin span{transform:rotate(45deg);color:#fff;font-size:12px;font-weight:700;}
+
+  /* Popup */
+  .leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.5;max-width:260px;}
+  .leaflet-popup-content .p-date{font-weight:700;color:#0d9488;}
+  .leaflet-popup-content .p-name{font-size:15px;font-weight:700;margin:3px 0;}
+  .leaflet-popup-content .p-act{color:#374151;}
+  .leaflet-popup-content .p-note{margin-top:6px;padding:6px 8px;background:#f3f4f6;border-radius:8px;font-size:12px;color:#4b5563;}
+  .p-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .pthumb{width:62px;height:62px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);}
+  .p-none{font-size:12px;color:#9ca3af;font-style:italic;}
+
+  /* Lightbox */
+  #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;
+    align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;}
+  #lightbox img{max-width:92%;max-height:82%;border-radius:8px;}
+  #lightbox .cap{color:#fff;font-size:12px;margin-top:10px;opacity:.8;}
+
+  /* Legend */
+  .legend{position:absolute;bottom:20px;left:60px;z-index:999;background:rgba(255,255,255,.95);
+    padding:8px 12px;border-radius:10px;font-size:11px;box-shadow:0 2px 10px rgba(0,0,0,.1);pointer-events:none;}
+  .legend-item{display:flex;align-items:center;gap:5px;margin:3px 0;}
+  .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+  @media (max-width:760px){
+    main{flex-direction:column;height:calc(100% - 90px);}
+    .map{height:42vh;flex:none;}
+    .timeline{width:100%;max-width:none;height:58vh;padding:10px 12px 30px;}
+    .legend{left:10px;bottom:10px;}
+  }
+</style>
+<style id="__dm_no_drag_style__">* { -webkit-user-drag: none !important; }</style><style id="__dm_bindable_badge_style__">[data-sp-bindable="database"]{outline:1px dashed #0088ff;outline-offset:2px;border-radius:4px;}[data-sp-bindable="database"] *{pointer-events:none !important;transition:none !important;animation:none !important;}[data-sp-bindable="database"]{transition:none !important;animation:none !important;}</style></head>
+<body data-page-node-id="VV9ya37aMDoziNHYzLqjXi" style="">
+<header data-page-node-id="WFJGAVR1GxIc2HVnVqAP0F">
+  <h1 data-page-node-id="nbcaIGG5ElftptZFBJbO7N">China Culinary Training · Itinerary Map</h1>
+  <p data-page-node-id="sAseoEaPVGOhCKFodQ2OBI">Plan B · 11 Days · Shanghai → Chengdu → Suzhou · Tap any stop for details &amp; photos</p>
+</header>
+<main data-page-node-id="XckFMyLCKx2qsKVadUleJp">
+  <aside class="timeline" id="timeline" data-page-node-id="3yT1CPczBZ89GwMWYKXozu"><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Pre-arrival</span><span class="day-badge">Sat 2027-03-27</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">2 stops</span></div><div class="stop active" data-idx="0">
+        <div class="badge" style="background:#2563eb">1</div>
+        <div class="body">
+          
+          <div class="name">Arrival in Shanghai</div>
+          <div class="act">Check in at Citadines; rest. Optional self-guided exploration.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="stop" data-idx="1">
+        <div class="badge" style="background:#2563eb">2</div>
+        <div class="body">
+          
+          <div class="name">Self-guided Shanghai</div>
+          <div class="act">Free day — wet-market visit / riverside walk optional.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Day 1</span><span class="day-badge">Mon 2027-03-29</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="2">
+        <div class="badge" style="background:#2563eb">3</div>
+        <div class="body">
+          <div class="time">09:00–17:00</div>
+          <div class="name">CieCAS Culinary Training — Day 1</div>
+          <div class="act">Professional culinary class at CieCAS (Shanghai).</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Day 2</span><span class="day-badge">Tue 2027-03-30</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="3">
+        <div class="badge" style="background:#2563eb">4</div>
+        <div class="body">
+          <div class="time">09:00–17:00</div>
+          <div class="name">CieCAS Culinary Training — Day 2</div>
+          <div class="act">Second day of culinary training at CieCAS.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="day-hd"><span class="dot" style="background:#ea580c"></span>
+      <span>Day 3</span><span class="day-badge">Wed 2027-03-31</span>
+      <span class="city-tag">Chengdu</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="4">
+        <div class="badge" style="background:#ea580c">5</div>
+        <div class="body">
+          
+          <div class="name">Arrive in Chengdu</div>
+          <div class="act">Domestic flight Shanghai → Chengdu (✈, ~2.5h); check in at hotel.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="day-hd"><span class="dot" style="background:#ea580c"></span>
+      <span>Day 4</span><span class="day-badge">Thu 2027-04-01</span>
+      <span class="city-tag">Chengdu</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="5">
+        <div class="badge" style="background:#ea580c">6</div>
+        <div class="body">
+          <div class="time">09:00–16:30</div>
+          <div class="name">Sichuan Tourism College</div>
+          <div class="act">Culinary class at the college (Sichuan cuisine techniques).</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="day-hd"><span class="dot" style="background:#ea580c"></span>
+      <span>Day 5</span><span class="day-badge">Fri 2027-04-02</span>
+      <span class="city-tag">Chengdu</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="6">
+        <div class="badge" style="background:#ea580c">7</div>
+        <div class="body">
+          <div class="time">09:00–16:30</div>
+          <div class="name">Sichuan Cuisine Museum</div>
+          <div class="act">Hands-on class at the Sichuan Cuisine Museum.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="day-hd"><span class="dot" style="background:#ea580c"></span>
+      <span>Day 6</span><span class="day-badge">Sat 2027-04-03</span>
+      <span class="city-tag">Chengdu</span><span class="stop-count">6 stops</span></div><div class="stop" data-idx="7">
+        <div class="badge" style="background:#ea580c">8</div>
+        <div class="body">
+          <div class="time">07:30–11:30</div>
+          <div class="name">Giant Panda Breeding Research Base</div>
+          <div class="act">Enter at South Gate; see the pandas.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="8">
+        <div class="badge" style="background:#ea580c">9</div>
+        <div class="body">
+          <div class="time">12:00–13:30</div>
+          <div class="name">Lunch · KuiXingLou Street</div>
+          <div class="act">Sichuan-style lunch near KuanZhái Alley.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="9">
+        <div class="badge" style="background:#ea580c">10</div>
+        <div class="body">
+          <div class="time">14:00–17:00</div>
+          <div class="name">People's Park · He Ming Teahouse</div>
+          <div class="act">Gaiwan tea + traditional ear-cleaning.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="10">
+        <div class="badge" style="background:#ea580c">11</div>
+        <div class="body">
+          <div class="time">17:30–19:30</div>
+          <div class="name">Local Chinese Wine Tasting</div>
+          <div class="act">3 native Chinese wines with terroir intro + snacks.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="11">
+        <div class="badge" style="background:#ea580c">12</div>
+        <div class="body">
+          <div class="time">20:00–21:30</div>
+          <div class="name">Shu Feng Ya Yun Opera</div>
+          <div class="act">Sichuan opera with face-changing &amp; fire-spitting (bilingual host).</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="12">
+        <div class="badge" style="background:#ea580c">13</div>
+        <div class="body">
+          <div class="time">21:40–23:00</div>
+          <div class="name">QinTai Road + KuanZhái Night Snacks</div>
+          <div class="act">Night walk &amp; street food.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="day-hd"><span class="dot" style="background:#ea580c"></span>
+      <span>Day 7</span><span class="day-badge">Sun 2027-04-04</span>
+      <span class="city-tag">Chengdu</span><span class="stop-count">5 stops</span></div><div class="stop" data-idx="13">
+        <div class="badge" style="background:#ea580c">14</div>
+        <div class="body">
+          <div class="time">09:30–12:00</div>
+          <div class="name">Wu Hou Shrine</div>
+          <div class="act">Visit with English audio guide; red walls &amp; bamboo.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="14">
+        <div class="badge" style="background:#ea580c">15</div>
+        <div class="body">
+          <div class="time">12:00–13:30</div>
+          <div class="name">Lunch near Wu Hou Shrine</div>
+          <div class="act">Sichuan cuisine lunch.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="15">
+        <div class="badge" style="background:#ea580c">16</div>
+        <div class="body">
+          <div class="time">14:00–16:30</div>
+          <div class="name">Shu Brocade &amp; Embroidery Museum</div>
+          <div class="act">Intangible-heritage Shu embroidery DIY (take-home sachet / bookmark / fan).</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="16">
+        <div class="badge" style="background:#ea580c">17</div>
+        <div class="body">
+          <div class="time">17:00–18:30</div>
+          <div class="name">Jin Li Ancient Street</div>
+          <div class="act">Stroll before lights-on; try DaSanPao, ShangXin LiangFen snacks.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="stop" data-idx="17">
+        <div class="badge" style="background:#ea580c">18</div>
+        <div class="body">
+          <div class="time">19:00–21:00</div>
+          <div class="name">Night Cruise on Jin River</div>
+          <div class="act">Boat tour from DongMen Pier; walk &amp; late snack on WangPing St.</div>
+        </div>
+        <div class="city-dot" style="background:#ea580c"></div></div><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Day 8</span><span class="day-badge">Mon 2027-04-05</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="18">
+        <div class="badge" style="background:#2563eb">19</div>
+        <div class="body">
+          
+          <div class="name">Return to Shanghai</div>
+          <div class="act">Domestic flight Chengdu → Shanghai (✈); overnight at Citadines.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Day 9</span><span class="day-badge">Tue 2027-04-06</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="19">
+        <div class="badge" style="background:#2563eb">20</div>
+        <div class="body">
+          <div class="time">18:00–</div>
+          <div class="name">Ming Court @ Cordis Hotel</div>
+          <div class="act">Michelin-starred Cantonese dinner at Ming Court; overnight at Cordis.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div><div class="day-hd"><span class="dot" style="background:#16a34a"></span>
+      <span>Day 10</span><span class="day-badge">Wed 2027-04-07</span>
+      <span class="city-tag">Suzhou</span><span class="stop-count">2 stops</span></div><div class="stop" data-idx="20">
+        <div class="badge" style="background:#16a34a">21</div>
+        <div class="body">
+          <div class="time">09:30–12:30</div>
+          <div class="name">Classical Gardens of Suzhou</div>
+          <div class="act">Day trip — visit a UNESCO garden (e.g. ZhuoZheng / Humble Administrator's).</div>
+        </div>
+        <div class="city-dot" style="background:#16a34a"></div></div><div class="stop" data-idx="21">
+        <div class="badge" style="background:#16a34a">22</div>
+        <div class="body">
+          <div class="time">14:00–16:30</div>
+          <div class="name">Suzhou Tea Culture &amp; Old Town</div>
+          <div class="act">Tea ceremony / silk-experience in the old town.</div>
+        </div>
+        <div class="city-dot" style="background:#16a34a"></div></div><div class="day-hd"><span class="dot" style="background:#2563eb"></span>
+      <span>Day 11</span><span class="day-badge">Thu 2027-04-08</span>
+      <span class="city-tag">Shanghai</span><span class="stop-count">1 stop</span></div><div class="stop" data-idx="22">
+        <div class="badge" style="background:#2563eb">23</div>
+        <div class="body">
+          
+          <div class="name">Departure to Switzerland</div>
+          <div class="act">Transfer to Pudong Airport (✈) → flight back to Switzerland.</div>
+        </div>
+        <div class="city-dot" style="background:#2563eb"></div></div></aside>
+  <div class="map leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" id="map" data-page-node-id="0jpdl1T6IVw2jxBWuV1NfB" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(-37px, 190px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 12; transform: translate3d(-65998px, 346px, 0px) scale(128);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 17; transform: translate3d(-942px, 22px, 0px) scale(4);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(-302px, 6px, 0px) scale(2);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 19; transform: translate3d(-120px, 3px, 0px) scale(1);"><img alt="" src="https://b.tile.openstreetmap.org/15/27429/13390.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(170px, -41px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/27430/13390.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(426px, -41px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/27429/13389.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(170px, -297px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/27430/13389.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(426px, -297px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/27429/13391.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(170px, 215px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/27430/13391.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(426px, 215px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/27428/13390.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-86px, -41px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/27431/13390.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(682px, -41px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/27428/13389.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-86px, -297px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/27431/13389.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(682px, -297px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/27428/13391.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-86px, 215px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/27431/13391.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(682px, 215px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(344px, -8px, 0px); z-index: -8;"><div class="pin" style="background:#2563eb"><span>1</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(3219px, -196px, 0px); z-index: -196;"><div class="pin" style="background:#2563eb"><span>2</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(199px, 25px, 0px); z-index: 25;"><div class="pin" style="background:#2563eb"><span>3</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(213px, 41px, 0px); z-index: 41;"><div class="pin" style="background:#2563eb"><span>4</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402463px, 15236px, 0px); z-index: 15236;"><div class="pin" style="background:#ea580c"><span>5</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-397943px, 17591px, 0px); z-index: 17591;"><div class="pin" style="background:#ea580c"><span>6</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-406658px, 11007px, 0px); z-index: 11007;"><div class="pin" style="background:#ea580c"><span>7</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-400669px, 13393px, 0px); z-index: 13393;"><div class="pin" style="background:#ea580c"><span>8</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402708px, 14943px, 0px); z-index: 14943;"><div class="pin" style="background:#ea580c"><span>9</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402738px, 15154px, 0px); z-index: 15154;"><div class="pin" style="background:#ea580c"><span>10</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402824px, 15214px, 0px); z-index: 15214;"><div class="pin" style="background:#ea580c"><span>11</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402922px, 14992px, 0px); z-index: 14992;"><div class="pin" style="background:#ea580c"><span>12</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402785px, 14970px, 0px); z-index: 14970;"><div class="pin" style="background:#ea580c"><span>13</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-403071px, 15710px, 0px); z-index: 15710;"><div class="pin" style="background:#ea580c"><span>14</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-403057px, 15691px, 0px); z-index: 15691;"><div class="pin" style="background:#ea580c"><span>15</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402995px, 15350px, 0px); z-index: 15350;"><div class="pin" style="background:#ea580c"><span>16</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-403097px, 15729px, 0px); z-index: 15729;"><div class="pin" style="background:#ea580c"><span>17</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-402002px, 15350px, 0px); z-index: 15350;"><div class="pin" style="background:#ea580c"><span>18</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(344px, -8px, 0px); z-index: -8;"><div class="pin" style="background:#2563eb"><span>19</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-595px, 706px, 0px); z-index: 706;"><div class="pin" style="background:#2563eb"><span>20</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-16587px, -2841px, 0px); z-index: -2841;"><div class="pin" style="background:#16a34a"><span>21</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(-17286px, -2432px, 0px); z-index: -2432;"><div class="pin" style="background:#16a34a"><span>22</span></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -26px; width: 26px; height: 26px; transform: translate3d(10909px, 1928px, 0px); z-index: 1928;"><div class="pin" style="background:#2563eb"><span>23</span></div></div></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"><div class="leaflet-popup  leaflet-zoom-animated" style="opacity: 1; transform: translate3d(344px, -32px, 0px); bottom: -7px; left: -145px;"><div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 261px;">
+        <div class="p-date">Pre-arrival · Sat 2027-03-27</div>
+        <div class="p-name">Arrival in Shanghai</div>
+        <div class="p-act">Check in at Citadines; rest. Optional self-guided exploration.</div>
+        <div class="p-note">Citadines Hongqiao Shanghai, 377 Songhong Road, Changning District — ~15 min walk to CieCAS.</div>
+        <div class="p-imgs"><img class="pthumb" src="images/sh_shanghai.jpg" onclick="showLightbox('images/sh_shanghai.jpg')"><img class="pthumb" src="images/sh_citadine2.jpg" onclick="showLightbox('images/sh_citadine2.jpg')"></div></div></div><div class="leaflet-popup-tip-container"><div class="leaflet-popup-tip"></div></div><a class="leaflet-popup-close-button" role="button" aria-label="Close popup" href="#close"><span aria-hidden="true">×</span></a></div></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(7.02212e+06px, 3.42787e+06px, 0px) scale(16384);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> © OpenStreetMap contributors</div></div></div></div>
+</main>
+<div class="legend" id="legend" data-page-node-id="HezoGGBZIaqLhMm88LCgO4"><b style="font-size:11px;color:#374151">City</b><br><div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>Shanghai</div><div class="legend-item"><span class="legend-dot" style="background:#ea580c"></span>Chengdu</div><div class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>Suzhou</div></div>
+<div id="lightbox" onclick="hideLightbox()" data-page-node-id="CfVv3lqsqtffBKImsHcAyB" style="display: flex;"><div class="cap" data-page-node-id="OuOmyKUJMzLmtKAuAxAH1x">Tap to close</div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* ============================================================
+   Day-based chronological itinerary map (Plan B)
+   - Single timeline ordered by day (Pre-arrival → Day 1 ... Day 11)
+   - Single China map with all markers colored by city
+   - Tap day header → fly to that day's cluster
+   - Tap stop → fly to marker + popup + photos
+   ============================================================ */
+
+const CITY_COLORS = {Shanghai:'#2563eb', Chengdu:'#ea580c', Suzhou:'#16a34a'};
+const DAY_ORDER = ['Pre-arrival','Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7','Day 8','Day 9','Day 10','Day 11'];
+
+const STAGES = [
+  /* ---- SHANGHAI ---- */
+  {city:"Shanghai", day:"Pre-arrival", date:"Sat 2027-03-27", time:"",
+    name:"Arrival in Shanghai", act:"Check in at Citadines; rest. Optional self-guided exploration.",
+    note:"Citadines Hongqiao Shanghai, 377 Songhong Road, Changning District — ~15 min walk to CieCAS.",
+    lat:31.2211, lng:121.3566,
+    images:["images/sh_shanghai.jpg","images/sh_citadine2.jpg"]},
+  {city:"Shanghai", day:"Pre-arrival", date:"Sun 2027-03-28", time:"",
+    name:"Self-guided Shanghai", act:"Free day — wet-market visit / riverside walk optional.",
+    note:"", lat:31.2280, lng:121.4800,
+    images:["images/sh_explore1.jpg","images/sh_explore2.jpg","images/sh_explore3.jpg"]},
+  {city:"Shanghai", day:"Day 1", date:"Mon 2027-03-29", time:"09:00–17:00",
+    name:"CieCAS Culinary Training — Day 1", act:"Professional culinary class at CieCAS (Shanghai).",
+    note:"CieCAS: Zhongshan International Plaza, Bldg B, 2F, 789 West Tianshan Rd, Changning District.",
+    lat:31.2199, lng:121.3504,
+    images:["images/sh_ciecas1.jpg","images/sh_ciecas2.jpg","images/sh_ciecas3.jpg"]},
+  {city:"Shanghai", day:"Day 2", date:"Tue 2027-03-30", time:"09:00–17:00",
+    name:"CieCAS Culinary Training — Day 2", act:"Second day of culinary training at CieCAS.",
+    note:"Same venue as Day 1.", lat:31.2193, lng:121.3510,
+    images:["images/sh_ciecas1.jpg","images/sh_ciecas2.jpg","images/sh_ciecas3.jpg"]},
+  {city:"Shanghai", day:"Day 8", date:"Mon 2027-04-05", time:"",
+    name:"Return to Shanghai", act:"Domestic flight Chengdu → Shanghai (✈); overnight at Citadines.",
+    note:"Citadines Hongqiao Shanghai, 377 Songhong Road, Changning District.",
+    lat:31.2211, lng:121.3566,
+    images:["images/sh_return1.jpg","images/sh_return2.jpg","images/sh_return3.jpg"]},
+  {city:"Shanghai", day:"Day 9", date:"Tue 2027-04-06", time:"18:00–",
+    name:"Ming Court @ Cordis Hotel", act:"Michelin-starred Cantonese dinner at Ming Court; overnight at Cordis.",
+    note:"Cordis Shanghai Hongqiao, 333 Shenhong Road, Minhang District. Ming Court (明阁) — 1 Michelin star, on B1.",
+    lat:31.1949, lng:121.3163,
+    images:["images/sh_michelin1.jpg","images/sh_michelin2.jpg","images/sh_michelin3.jpg"]},
+  {city:"Shanghai", day:"Day 11", date:"Thu 2027-04-08", time:"",
+    name:"Departure to Switzerland", act:"Transfer to Pudong Airport (✈) → flight back to Switzerland.",
+    note:"", lat:31.1500, lng:121.8100,
+    images:["images/sh_depart1.jpg","images/sh_depart2.jpg","images/sh_depart3.jpg"]},
+
+  /* ---- CHENGDU ---- */
+  {city:"Chengdu", day:"Day 3", date:"Wed 2027-03-31", time:"",
+    name:"Arrive in Chengdu", act:"Domestic flight Shanghai → Chengdu (✈, ~2.5h); check in at hotel.",
+    note:"", lat:30.6600, lng:104.0700,
+    images:["images/cd_arrive1.jpg"]},
+  {city:"Chengdu", day:"Day 4", date:"Thu 2027-04-01", time:"09:00–16:30",
+    name:"Sichuan Tourism College", act:"Culinary class at the college (Sichuan cuisine techniques).",
+    note:"Located in Longquanyi District.", lat:30.5730, lng:104.2640,
+    images:["images/cd_college1.jpg","images/cd_college2.jpg","images/cd_college3.jpg"]},
+  {city:"Chengdu", day:"Day 5", date:"Fri 2027-04-02", time:"09:00–16:30",
+    name:"Sichuan Cuisine Museum", act:"Hands-on class at the Sichuan Cuisine Museum.",
+    note:"Located in Pidu District (classic baocai / knife skills demo).",
+    lat:30.8160, lng:103.8900,
+    images:["images/cd_museum1.jpg","images/cd_museum2.jpg","images/cd_museum3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"07:30–11:30",
+    name:"Giant Panda Breeding Research Base", act:"Enter at South Gate; see the pandas.",
+    note:"Arrive at opening to avoid crowds & heat.", lat:30.7280, lng:104.1470,
+    images:["images/cd_panda1.jpg","images/cd_panda2.jpg","images/cd_panda3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"12:00–13:30",
+    name:"Lunch · KuiXingLou Street", act:"Sichuan-style lunch near KuanZhái Alley.",
+    note:"", lat:30.6708, lng:104.0595,
+    images:["images/cd_kuixing1.jpg","images/cd_kuixing2.jpg","images/cd_kuixing3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"14:00–17:00",
+    name:"People's Park · He Ming Teahouse", act:"Gaiwan tea + traditional ear-cleaning.",
+    note:"Classic Chengdu slow-living experience.", lat:30.6630, lng:104.0582,
+    images:["images/cd_teahouse1.jpg","images/cd_teahouse2.jpg","images/cd_teahouse3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"17:30–19:30",
+    name:"Local Chinese Wine Tasting", act:"3 native Chinese wines with terroir intro + snacks.",
+    note:"Backup: XiaoYi Winery (XiaoNan St, ~10 min walk from People's Park).",
+    lat:30.6608, lng:104.0545,
+    images:["images/cd_wine1.jpg","images/cd_wine2.jpg","images/cd_wine3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"20:00–21:30",
+    name:"Shu Feng Ya Yun Opera", act:"Sichuan opera with face-changing & fire-spitting (bilingual host).",
+    note:"QinTai Road — book seats in advance.", lat:30.6690, lng:104.0503,
+    images:["images/cd_opera1.jpg","images/cd_opera2.jpg","images/cd_opera3.jpg"]},
+  {city:"Chengdu", day:"Day 6", date:"Sat 2027-04-03", time:"21:40–23:00",
+    name:"QinTai Road + KuanZhái Night Snacks", act:"Night walk & street food.",
+    note:"", lat:30.6698, lng:104.0562,
+    images:["images/cd_alley1.jpg","images/cd_alley2.jpg","images/cd_alley3.jpg"]},
+  {city:"Chengdu", day:"Day 7", date:"Sun 2027-04-04", time:"09:30–12:00",
+    name:"Wu Hou Shrine", act:"Visit with English audio guide; red walls & bamboo.",
+    note:"", lat:30.6425, lng:104.0439,
+    images:["images/cd_wuhou3.jpg"]},
+  {city:"Chengdu", day:"Day 7", date:"Sun 2027-04-04", time:"12:00–13:30",
+    name:"Lunch near Wu Hou Shrine", act:"Sichuan cuisine lunch.",
+    note:"", lat:30.6432, lng:104.0445,
+    images:["images/cd_wuhoulunch1.jpg","images/cd_wuhoulunch2.jpg","images/cd_wuhoulunch3.jpg"]},
+  {city:"Chengdu", day:"Day 7", date:"Sun 2027-04-04", time:"14:00–16:30",
+    name:"Shu Brocade & Embroidery Museum", act:"Intangible-heritage Shu embroidery DIY (take-home sachet / bookmark / fan).",
+    note:"CaoTang East Road.", lat:30.6558, lng:104.0472,
+    images:["images/cd_embroidery1.jpg","images/cd_embroidery2.jpg","images/cd_embroidery3.jpg"]},
+  {city:"Chengdu", day:"Day 7", date:"Sun 2027-04-04", time:"17:00–18:30",
+    name:"Jin Li Ancient Street", act:"Stroll before lights-on; try DaSanPao, ShangXin LiangFen snacks.",
+    note:"Next to Wu Hou Shrine.", lat:30.6418, lng:104.0428,
+    images:["images/cd_jinli1.jpg","images/cd_jinli2.jpg","images/cd_jinli3.jpg"]},
+  {city:"Chengdu", day:"Day 7", date:"Sun 2027-04-04", time:"19:00–21:00",
+    name:"Night Cruise on Jin River", act:"Boat tour from DongMen Pier; walk & late snack on WangPing St.",
+    note:"", lat:30.6558, lng:104.0898,
+    images:["images/cd_cruise1.jpg","images/cd_cruise2.jpg","images/cd_cruise3.jpg"]},
+
+  /* ---- SUZHOU ---- */
+  {city:"Suzhou", day:"Day 10", date:"Wed 2027-04-07", time:"09:30–12:30",
+    name:"Classical Gardens of Suzhou", act:"Day trip — visit a UNESCO garden (e.g. ZhuoZheng / Humble Administrator's).",
+    note:"Same-day return to Shanghai by high-speed rail — business class.",
+    lat:31.3250, lng:120.6300,
+    images:["images/sz_garden1.jpg","images/sz_garden2.jpg","images/sz_garden3.jpg"]},
+  {city:"Suzhou", day:"Day 10", date:"Wed 2027-04-07", time:"14:00–16:30",
+    name:"Suzhou Tea Culture & Old Town", act:"Tea ceremony / silk-experience in the old town.",
+    note:"High-speed rail business class round trip (Shanghai ↔ Suzhou).",
+    lat:31.3100, lng:120.6000,
+    images:["images/sz_tea1.jpg","images/sz_tea2.jpg","images/sz_tea3.jpg"]}
+];
+
+/* ---------- Sort stages by day order ---------- */
+const dayRank = {};
+DAY_ORDER.forEach((d,i) => dayRank[d] = i);
+const SORTED = [...STAGES].sort((a,b) => {
+  const da = dayRank[a.day] ?? 99, db = dayRank[b.day] ?? 99;
+  if(da !== db) return da - db;
+  return (a.time||'').localeCompare(b.time||'');
+});
+
+/* Group by day */
+const DAY_GROUPS = {};
+SORTED.forEach(t => {
+  if(!DAY_GROUPS[t.day]) DAY_GROUPS[t.day] = [];
+  DAY_GROUPS[t.day].push(t);
+});
+
+/* ---------- Map init (China view) ---------- */
+const map = L.map('map', {zoomControl:true, tap:true}).setView([32.5, 112.0], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom:19, attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+const markerLayer = L.layerGroup().addTo(map);
+const markers = {}; // globalIdx -> marker
+
+/* ---------- Lightbox ---------- */
+function showLightbox(src){const o=document.getElementById('lightbox');o.querySelector('img').src=src;o.style.display='flex';}
+function hideLightbox(){document.getElementById('lightbox').style.display='none';}
+
+/* ---------- Icons ---------- */
+function pinIcon(color, n){
+  return L.divIcon({className:'', html:`<div class="pin" style="background:${color}"><span>${n}</span></div>`,
+    iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-24]});
+}
+
+/* ---------- Render ---------- */
+let activeStopIdx = -1;
+
+function render(){
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  markerLayer.clearLayers();
+  for(const k in markers) delete markers[k];
+
+  let globalIdx = 0;
+  const allBounds = [];
+
+  // Legend
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '<b style="font-size:11px;color:#374151">City</b><br>' +
+    Object.entries(CITY_COLORS).map(([c,col]) =>
+      `<div class="legend-item"><span class="legend-dot" style="background:${col}"></span>${c}</div>`
+    ).join('');
+
+  // Render each day group
+  DAY_ORDER.forEach(day => {
+    const stops = DAY_GROUPS[day];
+    if(!stops) return;
+
+    const color = CITY_COLORS[stops[0].city] || '#64748b';
+    const city = stops[0].city;
+    const dateStr = stops[0].date;
+
+    // Day header
+    const dh = document.createElement('div');
+    dh.className = 'day-hd';
+    dh.innerHTML = `<span class="dot" style="background:${color}"></span>
+      <span>${day}</span><span class="day-badge">${dateStr}</span>
+      <span class="city-tag">${city}</span><span class="stop-count">${stops.length} stop${stops.length>1?'s':''}</span>`;
+    dh.addEventListener('click', function(e){
+      e.stopPropagation();
+      // Fly to the first numbered stop of this day (per-point, not whole-day region)
+      const firstStopIdx = SORTED.findIndex(st => st.day === day);
+      if(firstStopIdx >= 0) focusStop(firstStopIdx);
+    });
+    // Mobile touch fallback
+    dh.addEventListener('touchend', function(e){
+      e.preventDefault();
+      const firstStopIdx = SORTED.findIndex(st => st.day === day);
+      if(firstStopIdx >= 0) focusStop(firstStopIdx);
+    }, {passive:false});
+    tl.appendChild(dh);
+
+    // Stops under this day
+    stops.forEach(t => {
+      const myIdx = globalIdx;  // capture per-iteration index (fixes closure bug)
+      const el = document.createElement('div');
+      el.className = 'stop';
+      el.dataset.idx = myIdx;
+      el.innerHTML = `
+        <div class="badge" style="background:${color}">${myIdx+1}</div>
+        <div class="body">
+          ${t.time ? `<div class="time">${t.time}</div>` : ''}
+          <div class="name">${t.name}</div>
+          <div class="act">${t.act}</div>
+        </div>
+        <div class="city-dot" style="background:${color}"></div>`;
+      el.onclick = () => focusStop(myIdx);
+      tl.appendChild(el);
+
+      // Marker
+      const m = L.marker([t.lat, t.lng], {icon:pinIcon(color, myIdx+1)}).addTo(markerLayer);
+      const imgs = (t.images && t.images.length)
+        ? `<div class="p-imgs">${t.images.map(s=>`<img class="pthumb" src="${s}" onclick="showLightbox('${s}')">`).join('')}</div>`
+        : `<div class="p-imgs"><span class="p-none">Photos to be added</span></div>`;
+      m.bindPopup(`
+        <div class="p-date">${t.day} · ${t.date}${t.time?` · ${t.time}`:''}</div>
+        <div class="p-name">${t.name}</div>
+        <div class="p-act">${t.act}</div>
+        ${t.note?`<div class="p-note">${t.note}</div>`:''}
+        ${imgs}`);
+      markers[myIdx] = m;
+      allBounds.push([t.lat, t.lng]);
+      globalIdx++;
+    });
+  });
+
+  // Fit all
+  if(allBounds.length > 0) map.flyToBounds(allBounds, {padding:[40,40], maxZoom:5});
+}
+
+/* ---------- Focus a stop ---------- */
+function focusStop(i){
+  const t = SORTED[i];
+  if(!t) return;
+  map.flyTo([t.lat, t.lng], 15, {duration:1.1});
+  markers[i].openPopup();
+  document.querySelectorAll('.stop').forEach(s => s.classList.toggle('active', +s.dataset.idx === i));
+  const el = document.querySelector(`.stop[data-idx="${i}"]`);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  activeStopIdx = i;
+}
+
+render();
+</script>
+
+
+
+</body></html>
