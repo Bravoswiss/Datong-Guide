@@ -1,0 +1,29 @@
+{
+  "name": "中国厨师之旅 · 行程地图",
+  "short_name": "厨师行程地图",
+  "description": "瑞士厨师中国交流项目行程地图（上海 / 成都 / 苏州）",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#B5341F",
+  "theme_color": "#B5341F",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
